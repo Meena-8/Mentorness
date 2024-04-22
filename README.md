@@ -1,2 +1,2 @@
 # Mentorness
-Data Analyst Internship at Mentorness On SQL &amp; Poer BI
+Data Analyst Internship at Mentorness On SQL &amp; Power BI
