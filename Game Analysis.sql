@@ -1,12 +1,12 @@
 -- I'm Using MySQL --
 -- Data Preprocessing --
 use game_analysis;
--- for player details table --
+-- for player details (pd) table --
 alter table pd modify L1_Status varchar(30);
 alter table pd modify L2_Status varchar(30);
 alter table pd modify P_ID int primary key;
 alter table pd drop myunknowncolumn;
--- for level details table --
+-- for level details (ld) table --
 alter table ld drop myunknowncolumn;
 alter table ld change timestamp start_datetime datetime;
 alter table ld modify Dev_Id varchar(10);
@@ -19,9 +19,12 @@ select * from ld;
 select * from pd;
   
 -- 1. Extract `P_ID`, `Dev_ID`, `PName`, and `Difficulty_level` of all players at Level 0 --
-SELECT a.P_ID, b.Dev_ID, a.PName, b.Difficulty, b.Level
-FROM ld as b, pd as a
-WHERE b.Level = 0;
+SELECT a.P_ID, b.Dev_ID, a.PName, b.Difficulty
+FROM pd as a
+JOIN ld as b
+	on a.P_ID = b.P_ID
+AND b.Level = 0
+ORDER BY 1;
 
 -- 2. Find `Level1_code`wise average `Kill_Count` where `lives_earned` is 2, and at least 3 stages are crossed.--
 SELECT a.L1_Code, AVG(b.Kill_Count) AS Average_Kill_Count
@@ -42,7 +45,7 @@ AND Dev_ID Like 'zm_%'
 GROUP BY difficulty
 ORDER BY total_stages_crossed DESC;
 
--- 4.Extract `P_ID` and the total number of unique dates for those players who have played games on multiple days.--
+-- 4. Extract `P_ID` and the total number of unique dates for those players who have played games on multiple days.--
 SELECT P_ID, COUNT(DISTINCT DATE(start_datetime)) AS unique_dates
 FROM ld
 GROUP BY P_ID
@@ -144,7 +147,7 @@ WITH PlayerScores AS (
 AvgPlayerScore AS (
     SELECT AVG(total_score) AS average_score
     FROM PlayerScores)
-SELECT ld.P_ID,
+SELECT DISTINCT ld.P_ID,
     ps.total_score AS player_total_score
 FROM ld
 JOIN 
